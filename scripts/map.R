@@ -38,7 +38,6 @@ library(stringr)
 library(magick)
 # library(maptools)
 # library(grid)
-# library(RCurl)
 
 k.dep <- c(
   "Piura", "Cajamarca", "La Libertad", "Ancash", "Loreto", "Huancavelica",

@@ -39,62 +39,121 @@ library(magick)
 # library(maptools)
 # library(grid)
 
-k.dep <- c(
-  "Piura", "Cajamarca", "La Libertad", "Ancash", "Loreto", "Huancavelica",
-  "Amazonas", "Madre de Dios", "Cusco", "Apurimac", "Puno", "Huanuco", "Pasco",
-  "Junin"
+#' LOAD LIST OF RASTER
+lst <- list.files(
+  "data/raster/ndvi/climatology/sd", pattern = ".tif",
+  full.names = T
 )
 
-cb.palette <-
-  c(
-    "#0000E1", "#0055EB", "#00AAF5", "#00FFFF", "#1BA704", "#14BD03", "#0ED302",
-    "#07E901", "#00FF00", "#40FF00", "#80FF00", "#BFFF00", "#FFFF00", "#F7D400",
-    "#EFA900", "#E87F00", "#E05400", "#D82900", "#B92E00", "#993300", "#737373"
-  )
+#' LOAD RASTER DATA
+index <- raster(lst[1])/10000
+# index[index > .3] <- NA
+# raster::hist(index)
 
-cb.palette <-
-  c(
-    "#0055EB", "#00AAF5", "#00FFFF", "#1BA704", "#14BD03", "#0ED302",
-    "#07E901", "#00FF00", "#40FF00", "#80FF00", "#BFFF00", "#FFFF00", "#F7D400",
-    "#EFA900", "#E87F00", "#E05400", "#D82900", "#B92E00", "#993300", "#737373"
-  )
+#' LOAD VECTOR DATA TO PLOT WHIT RASTER OF TEMPERATURE
+#'   load world countries limits
+#'     load sf data
+sf.world <- st_read(
+  dsn = "data/vector/limits.gpkg",
+  layer = "world_countries", quiet = T, as_tibble = T
+)
+#'     load sp data
+sp.world <- as(st_geometry(sf.world), Class = "Spatial")
 
-
-# index <- raster("data/raster/ndvi/climatology/mean/quarterly/MOD09A1.006_NDVI_qua.mean.Sep-Nov.tif")/10000
-index <- raster("data/raster/ndvi/climatology/sd/quarterly/MOD09A1.006_NDVI_qua.sd.Sep-Nov.tif")/10000
-raster::hist(index)
-
-sf.andes <- st_read(
+#'   load climat regions
+#'     load sf data
+sf.region <- st_read(
   dsn = "data/vector/climatic_regions.gpkg",
   layer = "bastian_regions", quiet = T, as_tibble = T
 ) %>%
-  filter(Region %in% c("Andes west slope", "Andes east slope"))
+  mutate(id = c(1, 4, 2, 3, 4)) %>%
+  group_by(id) %>%
+  summarise()
+#'     load sp data
+sp.region <- as(st_geometry(sf.region), Class = "Spatial")
 
-index <- raster::crop(index, sf.andes) %>% raster::mask(sf.andes)
+#' IF YOU WANT TO APPLAY MEAN FILTER
+#'   run it
+# index <- raster::focal(
+#   index,
+#   w = matrix(1, 3, 3),
+#   fun = function(x) {
+#     mean(x, na.rm = T)
+#   },
+#   pad = TRUE, na.rm = FALSE
+# )
 
-intrv <- c(-.1, seq(0, 1, .05))
-intrv.lbl <- c(-.1, seq(0, 1, .2))
+#' RESAMPLE RASTER
+index4 <- aggregate(index, fact = 10, fun = mean) %>%
+  raster::crop(sf.world) %>%
+  raster::mask(sf.world)
 
-intrv <- seq(0, .1, .01)
-intrv.lbl <- seq(0, .1, .02)
+#' DEFINE INTERVAL OF VALUES
+# intrv <- c(seq(0, .02, .005), seq(.03, .06, .01))
+# intrv.lbl <- c(0, .01, seq(.02, .06, .02))
 
+# intrv <- c(seq(0, .04, .01), seq(.06, .24, .02)) * .5
+# intrv.lbl <- c(0, .02, seq(.04, .24, .04)) * .5
 
-name <- "export/ndvi_sep-nov2.tif"
+intrv <- c(seq(0, .02, .005), seq(.03, .1, .01), seq(.12, .24, .02))
+intrv.lbl <- c(0, .02, .06, .1, .16, .24)
+
+#' BUILD PLOT
+#' Define color palette
+# cb.palette <-
+#   c(
+#     "#3f0a13", "#5b0f20", "#7f0f2a", "#9a132a", "#b22726",
+#     "#c44a30", "#ce6747", "#d68062", "#dd9881", "#e7b7a7",
+#     "#eed2c8", "#f9ebe8", "#4495c5", "#244ebd", "#293784",
+#     "#191e47"
+#   )
+
+# cb.palette <-
+#   c(
+#     "#3f0a13", "#5b0f20", "#7f0f2a", "#9a132a", "#b22726",
+#     "#c44a30", "#151d44", "#1c4058", "#1a5b69", "#117d79",
+#     "#389a82", "#7eb491", "#4495c5", "#244ebd", "#293784",
+#     "#191e47"
+#   )
+
+cb.palette <-
+  c(
+    "#3f0a13", "#770f29", "#a61b28", "#c75135", "#d68062",
+    "#e6b3a1", "#f5e4df",
+    "#122514", "#1b452d", "#176441", "#07874f", "#3aa955",
+    "#7dc375", "#aedfa1", "#dcffd5",
+    "#191e47", "#1e55c5", "#539ec5", "#c7d8de"
+  )
+
+# cb.palette <-
+#   c(
+#     "#3f0a13", "#620f22", "#860f2b", "#ac2127", "#c2442b",
+#     "#ce6747", "#d9866b", "#e1a591", "#edcbc0", "#f9ebe8",
+#     "#4495c5", "#244ebd", "#293784", "#191e47"
+#   )
+
+# cb.palette <-
+#   c(
+#     "#3f0a13", "#711027", "#9a132a", "#bd3b28", "#ce6747", "#dc937a", "#e9beb1",
+#     "#e6e9eb", "#4495c5", "#244ebd", "#293784", "#191e47"
+#   )
+
+name <- "export/ndvi_dic-feb4.tif"
 png(name, width = 20, height = 28, units = "cm", res = 500)
 
-levelplot(index,
+levelplot(index4,
   # main = list(
   #   title,
   #   cex = 2, side = 1, line = .5, fontfamily = "Source Sans Pro"
   # ),
   scales = list(
     x = list(limits = c(-81.8, -68.2)),
-    y = list(limits = c(-18.7, .4))
+    y = list(limits = c(-18.4, .1))
   ),
-  col.regions = rev(cb.palette),
+  col.regions = rev(cb.palette), #cpt("cmocean_balance"),#rev(cb.palette),
   margin = F,
   pretty = T,
-  maxpixels = 15e6,
+  maxpixels = 15e6,#15e6,
   at = intrv,
   colorkey = list(
     at = intrv,
@@ -113,17 +172,11 @@ levelplot(index,
     par.main.text = list(fontfamily = "Source Sans Pro"),
     par.sub.text = list(fontfamily = "Source Sans Pro")
   )
-) #+
-#   latticeExtra::layer(
-#     sp.lines(sp.world, col = "black", lwd = 2),
-#     # sp.lines(sp.dep, col = "black", lwd = .8)
-#     sp.points(sp.peru, pch = 20, cex = 1, col = "black"),
-#     sp.text(
-#       coordinates(sp.peru),
-#       txt = sf.peru$Departamen, pos = 1, cex = 1.2,
-#       fontfamily = "Source Sans Pro"
-#     )
-#   )
+) +
+  latticeExtra::layer(
+    sp.lines(sp.world, col = "black", lwd = 1.5),
+    sp.lines(sp.region, col = "black", lwd = 1.8)
+  )
 
 #' CLOSE THE SAVED OF PLOT
 dev.off()

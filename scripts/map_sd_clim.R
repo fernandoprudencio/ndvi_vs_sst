@@ -105,7 +105,7 @@ cb.palette <-
   )
 
 #'   Define plot name
-name <- "export/ndvi_v2.png"
+name <- "export/ndvi_sd_clim.png"
 #'   Save plot
 png(name, width = 20, height = 10, units = "cm", res = 500)
 

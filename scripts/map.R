@@ -36,19 +36,16 @@ library(latticeExtra)
 library(rasterVis)
 library(stringr)
 library(magick)
+library(gridExtra)
+library(grid)
 # library(maptools)
-# library(grid)
 
 #' LOAD LIST OF RASTER
 lst <- list.files(
-  "data/raster/ndvi/climatology/sd", pattern = ".tif",
+  "data/raster/ndvi/climatology/sd",
+  pattern = ".tif",
   full.names = T
 )
-
-#' LOAD RASTER DATA
-index <- raster(lst[1])/10000
-# index[index > .3] <- NA
-# raster::hist(index)
 
 #' LOAD VECTOR DATA TO PLOT WHIT RASTER OF TEMPERATURE
 #'   load world countries limits
@@ -83,39 +80,21 @@ sp.region <- as(st_geometry(sf.region), Class = "Spatial")
 #   pad = TRUE, na.rm = FALSE
 # )
 
-#' RESAMPLE RASTER
-index4 <- aggregate(index, fact = 10, fun = mean) %>%
+#' LOAD RASTER DATA
+index <-
+  aggregate(
+    raster::stack(lst) / 10000,
+    fact = 10, fun = mean
+  ) %>%
   raster::crop(sf.world) %>%
   raster::mask(sf.world)
 
 #' DEFINE INTERVAL OF VALUES
-# intrv <- c(seq(0, .02, .005), seq(.03, .06, .01))
-# intrv.lbl <- c(0, .01, seq(.02, .06, .02))
-
-# intrv <- c(seq(0, .04, .01), seq(.06, .24, .02)) * .5
-# intrv.lbl <- c(0, .02, seq(.04, .24, .04)) * .5
-
 intrv <- c(seq(0, .02, .005), seq(.03, .1, .01), seq(.12, .24, .02))
 intrv.lbl <- c(0, .02, .06, .1, .16, .24)
 
 #' BUILD PLOT
-#' Define color palette
-# cb.palette <-
-#   c(
-#     "#3f0a13", "#5b0f20", "#7f0f2a", "#9a132a", "#b22726",
-#     "#c44a30", "#ce6747", "#d68062", "#dd9881", "#e7b7a7",
-#     "#eed2c8", "#f9ebe8", "#4495c5", "#244ebd", "#293784",
-#     "#191e47"
-#   )
-
-# cb.palette <-
-#   c(
-#     "#3f0a13", "#5b0f20", "#7f0f2a", "#9a132a", "#b22726",
-#     "#c44a30", "#151d44", "#1c4058", "#1a5b69", "#117d79",
-#     "#389a82", "#7eb491", "#4495c5", "#244ebd", "#293784",
-#     "#191e47"
-#   )
-
+#'   Define color palette
 cb.palette <-
   c(
     "#3f0a13", "#770f29", "#a61b28", "#c75135", "#d68062",
@@ -125,57 +104,62 @@ cb.palette <-
     "#191e47", "#1e55c5", "#539ec5", "#c7d8de"
   )
 
-# cb.palette <-
-#   c(
-#     "#3f0a13", "#620f22", "#860f2b", "#ac2127", "#c2442b",
-#     "#ce6747", "#d9866b", "#e1a591", "#edcbc0", "#f9ebe8",
-#     "#4495c5", "#244ebd", "#293784", "#191e47"
-#   )
+#'   Define plot name
+name <- "export/ndvi_v2.png"
+#'   Save plot
+png(name, width = 20, height = 10, units = "cm", res = 500)
 
-# cb.palette <-
-#   c(
-#     "#3f0a13", "#711027", "#9a132a", "#bd3b28", "#ce6747", "#dc937a", "#e9beb1",
-#     "#e6e9eb", "#4495c5", "#244ebd", "#293784", "#191e47"
-#   )
-
-name <- "export/ndvi_dic-feb4.tif"
-png(name, width = 20, height = 28, units = "cm", res = 500)
-
-levelplot(index4,
-  # main = list(
-  #   title,
-  #   cex = 2, side = 1, line = .5, fontfamily = "Source Sans Pro"
-  # ),
+levelplot(index,
+  names.attr =
+    c(
+      "e) DJF Standard Deviation", "f) MAM Standard Deviation",
+      "g) JJA Standard Deviation", "h) SON Standard Deviation"
+    ),
+  par.strip.text = list(cex = .8, lines = 1.5), # header size for each map
+  # layout = c(4, 1), # define number of row and colums
   scales = list(
-    x = list(limits = c(-81.8, -68.2)),
-    y = list(limits = c(-18.4, .1))
+    x = list(
+      limits = c(-81.8, -68.2), tick.number = 4#, tck = .2
+    ),
+    y = list(
+      at = c(-15, -10, -5, 0), limits = c(-18.5, .1), rot = 90,
+      tick.number = 4
+    ),
+    draw = T
   ),
-  col.regions = rev(cb.palette), #cpt("cmocean_balance"),#rev(cb.palette),
+  col.regions = rev(cb.palette),
   margin = F,
   pretty = T,
-  maxpixels = 15e6,#15e6,
+  maxpixels = 15e6,
   at = intrv,
   colorkey = list(
-    at = intrv,
-    space = "right", # location of legend
-    labels = list(at = intrv.lbl, cex = 1.1),
-    font = list(family = "Source Sans Pro")
+    at = intrv, height = .8, width = 1.1,
+    space = "top", tck = .3, # location of legend
+    labels = list(at = intrv.lbl, cex = .7),
+    font = list(family = "Source Sans Pro"),
+    axis.line = list(lwd = 1, col = "black")
   ),
   xlab = NULL,
   ylab = NULL,
-  aspect.fill = T,
   par.settings = list(
-    axis.text = list(fontfamily = "Source Sans Pro", cex = 1.2),
-    axis.text = list(fontfamily = "Source Sans Pro", cex = 1.2),
-    par.xlab.text = list(fontfamily = "Source Sans Pro"),
-    par.ylab.text = list(fontfamily = "Source Sans Pro"),
-    par.main.text = list(fontfamily = "Source Sans Pro"),
-    par.sub.text = list(fontfamily = "Source Sans Pro")
-  )
+    axis.text = list(fontfamily = "Source Sans Pro", cex = .6),
+    axis.components = list(
+      bottom = list(tck = .4, pad1 = .3),
+      left = list(tck = .4, pad1 = .3)
+    ),
+    strip.background = list(col = "transparent"), # header fill for each map
+    strip.border = list(col = "transparent", lwd = 1), # header line for each map
+    panel.background = list(col = "gray"),
+    axis.line = list(lwd = 1, col = "black")
+  ),
+  par.xlab.text = list(fontfamily = "Source Sans Pro"),
+  par.ylab.text = list(fontfamily = "Source Sans Pro"),
+  par.main.text = list(fontfamily = "Source Sans Pro"),
+  par.sub.text = list(fontfamily = "Source Sans Pro")
 ) +
   latticeExtra::layer(
-    sp.lines(sp.world, col = "black", lwd = 1.5),
-    sp.lines(sp.region, col = "black", lwd = 1.8)
+    sp.lines(sp.world, col = "black", lwd = .5),
+    sp.lines(sp.region, col = "black", lwd = .7)
   )
 
 #' CLOSE THE SAVED OF PLOT
@@ -187,4 +171,4 @@ img <- magick::image_read(name, strip = TRUE) %>%
   image_border("white", "50x50")
 
 #' SAVE FIGURE
-image_write(img, path = name, format = "png")
+image_write(img, path = name, format = "png", quality = 100)

@@ -194,4 +194,79 @@ polygon(x, y, density = 50, col = "skyblue")
 
 
 
+# CORRELACION CRUZADA NORMALIZADA
+# plot the graph in R
+set.seed(15)
+a <- c(1,2,-2,4,2,3,1,0,3,4,2,3,1)
+b <- a + rnorm(length(a), sd = 0.4)
+plot(ts(b), col="#f44e2e", lwd=3)
+lines(a, col="#27ccc0", lwd=3)
 
+# compute using the R language
+corr <- ccf(a,b)
+corr
+#
+correlationTable <- function(graphs) {
+  cross <- matrix(nrow = length(graphs), ncol = length(graphs))
+  for (graph1Id in 1:length(graphs)) {
+    graph1 <- graphs[[graph1Id]]
+    print(graph1Id)
+    for (graph2Id in 1:length(graphs)) {
+      graph2 <- graphs[[graph2Id]]
+      if (graph1Id == graph2Id) {
+        break
+      } else {
+        correlation <- ccf(graph1, graph2, lag.max = 0)
+        cross[graph1Id, graph2Id] <- correlation$acf[1]
+      }
+    }
+  }
+  cross
+}
+
+graphs <- read.csv("data/tables/graphs45.csv")
+corr <- correlationTable(graphs)
+corr[4, 3]
+
+findCorrelated <- function(orig, highCorr) {
+  match <- highCorr[highCorr[, 1] == orig | highCorr[, 2] == orig, ]
+  match <- as.vector(match)
+  match[match != orig]
+}
+
+highCorr <- which(corr > 0.90, arr.ind = TRUE)
+match <- findCorrelated(4, highCorr)
+match # print 6 12 23 42 44 45  3
+
+###
+bound <- function(graphs, orign, match) {
+  graphOrign <- graphs[[orign]]
+  graphMatch <- graphs[match]
+  allValue <- c(graphOrign)
+  for (m in graphMatch) {
+    allValue <- c(allValue, m)
+  }
+  c(min(allValue), max(allValue))
+}
+
+plotSimilar <- function(graphs, orign, match) {
+  lim <- bound(graphs, orign, match)
+
+  graphOrign <- graphs[[orign]]
+  plot(ts(graphOrign), ylim = lim, xlim = c(1, length(graphOrign) + 25), lwd = 3)
+  title(paste("Similar to", orign, "(black bold)"))
+
+  cols <- c()
+  names <- c()
+  for (i in 1:length(match)) {
+    m <- match[[i]]
+    matchGraph <- graphs[[m]]
+    lines(x = 1:length(matchGraph), y = matchGraph, col = i)
+
+    cols <- c(cols, i)
+    names <- c(names, paste0(m))
+  }
+  legend("topright", names, col = cols, lty = c(1, 1))
+}
+
+plotSimilar(graphs, 4, match)

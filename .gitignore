@@ -1,4 +1,10 @@
-\data
+data/*
+!data/rdata
+data/rdata/*
+!data/rdata/Andesregion_timeseries.RData
+!data/rdata/anomalies_iv-and-sst.RData
+!data/rdata/modis_date.RData
+
 \info
 \export
 .Rproj.user

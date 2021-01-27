@@ -77,6 +77,9 @@ df.ts <-
     date = seq(as.Date("2001-12-01"), as.Date("2020-12-01"), by = "1 month")
   )
 
+#' SAVE DATAFRAME AS .Rdata FILE
+save(df.ts, file = "data/rdata/Andesregion_timeseries.RData")
+
 #' EXAMPLE TO PLOT TIME SERIES BY ANDES REGION
 ggplot(df.ts) +
   geom_line(aes(date, ts.nw)) +

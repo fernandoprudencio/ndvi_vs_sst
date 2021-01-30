@@ -34,64 +34,217 @@ lbls <-
 
 plt.iv.north <-
   ggplot(df.iv.north, aes(x = date, y = anom, group = region)) +
-  labs(y = "GVMI") +
+  labs(y = "NDVI anomaly") +
+  geom_hline(
+    yintercept = 0, linetype = "dashed", color = "black", size = .3
+  ) +
   geom_line(aes(linetype = region, color = region, size = region)) +
-  #geom_point(aes(shape = type, color = type), size = 2) +
+  # geom_point(aes(color = region), size = .01) +
   scale_linetype_manual(
-    values = c("solid", "solid"), labels = lbls[1:2]
+    values = c("solid", "solid"), labels = lbls[2:1]
   ) +
   scale_color_manual(
     values = c(
+      # "black", "gray"
       rgb(105.9, 54.4, 0, maxColorValue = 255),
-      rgb(241.9, 175.4, 105.2, maxColorValue = 255)
+      rgb(204.9, 166.8, 100.2, maxColorValue = 255)
     ),
-    labels = lbls[1:2]
+    labels = lbls[2:1]
   ) +
-  scale_size_manual(values = rep(1, 2), labels = lbls[1:2]) +
+  scale_size_manual(values = rep(.4, 2), labels = lbls[2:1]) +
   scale_x_date(
-    limits = c(as.Date("2001-12-01"), as.Date("2020-12-31")),
-    breaks = seq(as.Date("2001-12-01"), as.Date("2020-12-31"), by = "1 year"),
-    date_labels = "%y", expand = expansion(mult = c(0, 0))
+    limits = c(as.Date("2002-01-01"), as.Date("2020-12-31")),
+    breaks = seq(as.Date("2003-01-01"), as.Date("2020-12-31"), by = "1 year"),
+    date_labels = "%Y", expand = expansion(mult = c(0, 0))
   ) +
   scale_y_continuous(
-    breaks = seq(-.2, .1, .05),
-    limits = c(-.2, .1)
+    breaks = seq(-.2, .2, .1),
+    limits = c(-.2, .2)
   ) +
   theme_bw() +
   theme(
-    legend.background = element_rect(fill = "white", color = "black"),
-    legend.margin = margin(3, 7, 7, 7),
-    # legend.key.size = unit(.8, "cm"),
-    legend.key.width = unit(1.6, "cm"),
-    legend.key.height = unit(1.1, "cm"),
-    legend.position = c(0.77, 0.78),
+    legend.background =
+      element_rect(fill = "transparent", color = "transparent", size = .2),
+    legend.key.size = unit(5, "cm"),
+    legend.direction = "horizontal",
+    legend.box.margin = margin(0, 0, 0, 0),
+    legend.key.width = unit(.4, "cm"),
+    legend.key.height = unit(.05, "cm"),
+    legend.position = c(0.5, 0.85),
     legend.title = element_blank(),
-    legend.text = element_text(size = 15, family = "Source Sans Pro"),
-    plot.title = element_text(size = 15, hjust = .5, family = "Source Sans Pro"),
+    legend.text = element_text(size = 6, family = "Source Sans Pro"),
     axis.text.x = element_text(
-      size = 12, colour = "black", family = "Source Sans Pro",
-      face = "bold", angle = 0, vjust = .6
+      size = 7, colour = "black", family = "Source Sans Pro",
+      angle = 0, vjust = .6
     ),
     axis.text.y = element_text(
-      size = 13, face = "bold", family = "Source Sans Pro", color = "black"
+      size = 7, family = "Source Sans Pro", color = "black",
+      face = c("plain", "plain", "bold", "plain", "plain")
     ),
     axis.title.x = element_blank(),
     axis.title.y = element_text(
-      face = "bold", family = "Source Sans Pro", color = "black", size = 20
+      family = "Source Sans Pro", color = "black", size = 8 # , face = "bold"
     ),
-    axis.ticks.x = element_line(color = "black"),
-    axis.ticks.y = element_line(color = "black"),
+    axis.ticks.x = element_line(color = "black", size = .3),
+    axis.ticks.y = element_line(color = "black", size = .3),
+    axis.ticks.length.x = unit(1.5, "pt"),
+    axis.ticks.length.y = unit(1.5, "pt"),
     panel.grid = element_blank(),
     panel.border = element_rect(size = .5, color = "black"),
-    plot.margin = margin(1.5, .1, 1, 1, "cm"),
-    axis.line.y = element_line(
-      size = .8, color = "black"
-    )
+    plot.margin = margin(1.5, .1, 1, 1, "cm") # ,
   )
 
-name <- sprintf("exports/%s_ssnl.png", k.index)
+ggsave(
+  plot = plt.iv.north, "export/anom_north_ndvi.png",
+  width = 15, height = 4.5, units = "cm", dpi = 500
+)
+
+####################################################################
+####################################################################
+####################################################################
+####################################################################
+####################################################################
+####################################################################
+
+plt.iv.central <-
+  ggplot(df.iv.central, aes(x = date, y = anom, group = region)) +
+  labs(y = "NDVI anomaly") +
+  geom_hline(
+    yintercept = 0, linetype = "dashed", color = "black", size = .3
+  ) +
+  geom_line(aes(linetype = region, color = region, size = region)) +
+  # geom_point(aes(color = region), size = .01) +
+  scale_linetype_manual(
+    values = c("solid", "solid"), labels = lbls[4:3]
+  ) +
+  scale_color_manual(
+    values = c(
+      # "black", "gray"
+      rgb(105.9, 54.4, 0, maxColorValue = 255),
+      rgb(204.9, 166.8, 100.2, maxColorValue = 255)
+    ),
+    labels = lbls[4:3]
+  ) +
+  scale_size_manual(values = rep(.4, 2), labels = lbls[4:3]) +
+  scale_x_date(
+    limits = c(as.Date("2002-01-01"), as.Date("2020-12-31")),
+    breaks = seq(as.Date("2003-01-01"), as.Date("2020-12-31"), by = "1 year"),
+    date_labels = "%Y", expand = expansion(mult = c(0, 0))
+  ) +
+  scale_y_continuous(
+    breaks = seq(-.2, .2, .1),
+    limits = c(-.2, .2)
+  ) +
+  theme_bw() +
+  theme(
+    legend.background =
+      element_rect(fill = "transparent", color = "transparent", size = .2),
+    legend.key.size = unit(5, "cm"),
+    legend.direction = "horizontal",
+    legend.box.margin = margin(0, 0, 0, 0),
+    legend.key.width = unit(.4, "cm"),
+    legend.key.height = unit(.05, "cm"),
+    legend.position = c(0.5, 0.85),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 6, family = "Source Sans Pro"),
+    axis.text.x = element_text(
+      size = 7, colour = "black", family = "Source Sans Pro",
+      angle = 0, vjust = .6
+    ),
+    axis.text.y = element_text(
+      size = 7, family = "Source Sans Pro", color = "black",
+      face = c("plain", "plain", "bold", "plain", "plain")
+    ),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(
+      family = "Source Sans Pro", color = "black", size = 8 # , face = "bold"
+    ),
+    axis.ticks.x = element_line(color = "black", size = .3),
+    axis.ticks.y = element_line(color = "black", size = .3),
+    axis.ticks.length.x = unit(1.5, "pt"),
+    axis.ticks.length.y = unit(1.5, "pt"),
+    panel.grid = element_blank(),
+    panel.border = element_rect(size = .5, color = "black"),
+    plot.margin = margin(1.5, .1, 1, 1, "cm") # ,
+  )
 
 ggsave(
-  plot = plt.iv, name,
-  width = 20, height = 15, units = "cm", dpi = 500
+  plot = plt.iv.central, "export/anom_central_ndvi.png",
+  width = 15, height = 4.5, units = "cm", dpi = 500
 )
+
+####################################################################
+####################################################################
+####################################################################
+####################################################################
+####################################################################
+####################################################################
+
+plt.iv.south <-
+  ggplot(df.iv.central, aes(x = date, y = anom, group = region)) +
+  labs(y = "NDVI anomaly") +
+  geom_hline(
+    yintercept = 0, linetype = "dashed", color = "black", size = .3
+  ) +
+  geom_line(aes(linetype = region, color = region, size = region)) +
+  # geom_point(aes(color = region), size = .01) +
+  scale_linetype_manual(
+    values = c("solid", "solid"), labels = lbls[4:3]
+  ) +
+  scale_color_manual(
+    values = c(
+      # "black", "gray"
+      rgb(105.9, 54.4, 0, maxColorValue = 255),
+      rgb(204.9, 166.8, 100.2, maxColorValue = 255)
+    ),
+    labels = lbls[4:3]
+  ) +
+  scale_size_manual(values = rep(.4, 2), labels = lbls[4:3]) +
+  scale_x_date(
+    limits = c(as.Date("2002-01-01"), as.Date("2020-12-31")),
+    breaks = seq(as.Date("2003-01-01"), as.Date("2020-12-31"), by = "1 year"),
+    date_labels = "%Y", expand = expansion(mult = c(0, 0))
+  ) +
+  scale_y_continuous(
+    breaks = seq(-.2, .2, .1),
+    limits = c(-.2, .2)
+  ) +
+  theme_bw() +
+  theme(
+    legend.background =
+      element_rect(fill = "transparent", color = "transparent", size = .2),
+    legend.key.size = unit(5, "cm"),
+    legend.direction = "horizontal",
+    legend.box.margin = margin(0, 0, 0, 0),
+    legend.key.width = unit(.4, "cm"),
+    legend.key.height = unit(.05, "cm"),
+    legend.position = c(0.5, 0.85),
+    legend.title = element_blank(),
+    legend.text = element_text(size = 6, family = "Source Sans Pro"),
+    axis.text.x = element_text(
+      size = 7, colour = "black", family = "Source Sans Pro",
+      angle = 0, vjust = .6
+    ),
+    axis.text.y = element_text(
+      size = 7, family = "Source Sans Pro", color = "black",
+      face = c("plain", "plain", "bold", "plain", "plain")
+    ),
+    axis.title.x = element_blank(),
+    axis.title.y = element_text(
+      family = "Source Sans Pro", color = "black", size = 8 # , face = "bold"
+    ),
+    axis.ticks.x = element_line(color = "black", size = .3),
+    axis.ticks.y = element_line(color = "black", size = .3),
+    axis.ticks.length.x = unit(1.5, "pt"),
+    axis.ticks.length.y = unit(1.5, "pt"),
+    panel.grid = element_blank(),
+    panel.border = element_rect(size = .5, color = "black"),
+    plot.margin = margin(1.5, .1, 1, 1, "cm") # ,
+  )
+
+ggsave(
+  plot = plt.iv.south, "export/anom_central_ndvi.png",
+  width = 15, height = 4.5, units = "cm", dpi = 500
+)
+
+

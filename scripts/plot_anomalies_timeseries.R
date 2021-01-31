@@ -1,7 +1,7 @@
 rm(list = ls())
 
-library(ggpubr)
 library(tidyverse)
+library(ggpubr)
 
 load("data/rdata/anomalies_iv-and-sst.RData")
 
@@ -9,18 +9,21 @@ df.iv.north <-
   dplyr::select(
     df.anom, c("date", "ts.nw", "ts.ne")
   ) %>%
+  rename("01-ts.nw" = "ts.nw", "02-ts.ne" = "ts.ne") %>%
   gather(key = "region", value = "anom", -date)
 
 df.iv.central <-
   dplyr::select(
     df.anom, c("date", "ts.cw", "ts.ce")
   ) %>%
+  rename("01-ts.cw" = "ts.cw", "02-ts.ce" = "ts.ce") %>%
   gather(key = "region", value = "anom", -date)
 
 df.iv.south <-
   dplyr::select(
     df.anom, c("date", "ts.sw", "ts.se")
   ) %>%
+  rename("01-ts.sw" = "ts.sw", "02-ts.se" = "ts.se") %>%
   gather(key = "region", value = "anom", -date)
 
 
@@ -37,27 +40,32 @@ plt.iv.north <-
   geom_hline(
     yintercept = 0, linetype = "dashed", color = "black", size = .3
   ) +
+  geom_hline(
+    yintercept = c(-.2, -.1, .1, .2),
+    linetype = "dashed", color = "black", size = .01
+  ) +
   geom_line(aes(linetype = region, color = region, size = region)) +
   # geom_point(aes(color = region), size = .01) +
   scale_linetype_manual(
-    values = c("solid", "solid"), labels = lbls[2:1]
+    values = c("solid", "solid"), labels = lbls[1:2]
   ) +
   scale_color_manual(
     values = c(
-      # "black", "gray"
-      rgb(105.9, 54.4, 0, maxColorValue = 255),
-      rgb(204.9, 166.8, 100.2, maxColorValue = 255)
+      "black", "gray"
+      # rgb(105.9, 54.4, 0, maxColorValue = 255),
+      # rgb(204.9, 166.8, 100.2, maxColorValue = 255)
     ),
-    labels = lbls[2:1]
+    labels = lbls[1:2]
   ) +
-  scale_size_manual(values = rep(.4, 2), labels = lbls[2:1]) +
+  scale_size_manual(values = rep(.4, 2), labels = lbls[1:2]) +
   scale_x_date(
     limits = c(as.Date("2002-01-01"), as.Date("2020-12-31")),
-    breaks = seq(as.Date("2003-01-01"), as.Date("2020-12-31"), by = "1 year"),
-    date_labels = "%Y", expand = expansion(mult = c(0, 0))
+    breaks = seq(as.Date("2002-01-01"), as.Date("2020-12-31"), by = "1 year"),
+    date_labels = "%Y", expand = expansion(mult = c(.005, 0))
   ) +
   scale_y_continuous(
     breaks = seq(-.2, .2, .1),
+    labels = c("-.2", "", "0", "", ".2"),
     limits = c(-.2, .2)
   ) +
   theme_bw() +
@@ -69,7 +77,8 @@ plt.iv.north <-
     legend.box.margin = margin(0, 0, 0, 0),
     legend.key.width = unit(.4, "cm"),
     legend.key.height = unit(.05, "cm"),
-    legend.position = c(0.5, 0.85),
+    # legend.position = c(0.5, 0.85),
+    legend.position = c(0.5, 0.88),
     legend.title = element_blank(),
     legend.text = element_text(size = 6, family = "Source Sans Pro"),
     axis.text.x = element_blank(),
@@ -79,7 +88,7 @@ plt.iv.north <-
     ),
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
-    axis.ticks.x = element_blank(),
+    axis.ticks.x = element_line(color = "black", size = .3),
     axis.ticks.y = element_line(color = "black", size = .3),
     axis.ticks.length.x = unit(1.5, "pt"),
     axis.ticks.length.y = unit(1.5, "pt"),
@@ -106,28 +115,29 @@ plt.iv.central <-
   geom_hline(
     yintercept = 0, linetype = "dashed", color = "black", size = .3
   ) +
+  geom_hline(
+    yintercept = c(-.1, -.05, .05, .1),
+    linetype = "dashed", color = "black", size = .01
+  ) +
   geom_line(aes(linetype = region, color = region, size = region)) +
   # geom_point(aes(color = region), size = .01) +
   scale_linetype_manual(
-    values = c("solid", "solid"), labels = lbls[4:3]
+    values = c("solid", "solid"), labels = lbls[3:4]
   ) +
   scale_color_manual(
-    values = c(
-      # "black", "gray"
-      rgb(105.9, 54.4, 0, maxColorValue = 255),
-      rgb(204.9, 166.8, 100.2, maxColorValue = 255)
-    ),
-    labels = lbls[4:3]
+    values = c("black", "gray"),
+    labels = lbls[3:4]
   ) +
-  scale_size_manual(values = rep(.4, 2), labels = lbls[4:3]) +
+  scale_size_manual(values = rep(.4, 2), labels = lbls[3:4]) +
   scale_x_date(
     limits = c(as.Date("2002-01-01"), as.Date("2020-12-31")),
-    breaks = seq(as.Date("2003-01-01"), as.Date("2020-12-31"), by = "1 year"),
-    date_labels = "%Y", expand = expansion(mult = c(0, 0))
+    breaks = seq(as.Date("2002-01-01"), as.Date("2020-12-31"), by = "1 year"),
+    date_labels = "%Y", expand = expansion(mult = c(.005, 0))
   ) +
   scale_y_continuous(
-    breaks = seq(-.2, .2, .1),
-    limits = c(-.2, .2)
+    breaks = seq(-.1, .1, .05),
+    labels = c("-.1", "", "0", "", ".1"),
+    limits = c(-.1, .1)
   ) +
   theme_bw() +
   theme(
@@ -138,7 +148,7 @@ plt.iv.central <-
     legend.box.margin = margin(0, 0, 0, 0),
     legend.key.width = unit(.4, "cm"),
     legend.key.height = unit(.05, "cm"),
-    legend.position = c(0.5, 0.85),
+    legend.position = c(0.5, 0.88),
     legend.title = element_blank(),
     legend.text = element_text(size = 6, family = "Source Sans Pro"),
     axis.text.x = element_blank(),
@@ -150,7 +160,7 @@ plt.iv.central <-
     axis.title.y = element_text(
       family = "Source Sans Pro", color = "black", size = 8 # , face = "bold"
     ),
-    axis.ticks.x = element_blank(),
+    axis.ticks.x = element_line(color = "black", size = .3),
     axis.ticks.y = element_line(color = "black", size = .3),
     axis.ticks.length.x = unit(1.5, "pt"),
     axis.ticks.length.y = unit(1.5, "pt"),
@@ -177,28 +187,35 @@ plt.iv.south <-
   geom_hline(
     yintercept = 0, linetype = "dashed", color = "black", size = .3
   ) +
+  geom_hline(
+    yintercept = c(-.1, -.05, .05, .1),
+    linetype = "dashed", color = "black", size = .01
+  ) +
   geom_line(aes(linetype = region, color = region, size = region)) +
   # geom_point(aes(color = region), size = .01) +
   scale_linetype_manual(
-    values = c("solid", "solid"), labels = lbls[6:5]
+    values = c("solid", "solid"), labels = lbls[5:6]
   ) +
   scale_color_manual(
-    values = c(
-      # "black", "gray"
-      rgb(105.9, 54.4, 0, maxColorValue = 255),
-      rgb(204.9, 166.8, 100.2, maxColorValue = 255)
-    ),
-    labels = lbls[6:5]
+    values = c("black", "gray"),
+    labels = lbls[5:6]
   ) +
-  scale_size_manual(values = rep(.4, 2), labels = lbls[6:5]) +
+  scale_size_manual(values = rep(.4, 2), labels = lbls[5:6]) +
   scale_x_date(
     limits = c(as.Date("2002-01-01"), as.Date("2020-12-31")),
-    breaks = seq(as.Date("2003-01-01"), as.Date("2020-12-31"), by = "1 year"),
-    date_labels = "%Y", expand = expansion(mult = c(0, 0))
+    breaks = seq(as.Date("2002-01-01"), as.Date("2020-12-31"), by = "1 year"),
+    # date_labels = "%Y", expand = expansion(mult = c(0, 0)),
+    labels =
+      c(
+        "", "2003", "", "2005", "", "2007", "", "2009", "", "2011", "",
+        "2013", "", "2015", "", "2017", "", "2019", ""
+      ),
+    expand = expansion(mult = c(.005, 0))
   ) +
   scale_y_continuous(
-    breaks = seq(-.2, .2, .1),
-    limits = c(-.2, .2)
+    breaks = seq(-.1, .1, .05),
+    labels = c("-.1", "", "0", "", ".1"),
+    limits = c(-.1, .1)
   ) +
   theme_bw() +
   theme(
@@ -209,7 +226,7 @@ plt.iv.south <-
     legend.box.margin = margin(0, 0, 0, 0),
     legend.key.width = unit(.4, "cm"),
     legend.key.height = unit(.05, "cm"),
-    legend.position = c(0.5, 0.85),
+    legend.position = c(0.5, 0.88),
     legend.title = element_blank(),
     legend.text = element_text(size = 6, family = "Source Sans Pro"),
     axis.text.x = element_text(
@@ -239,7 +256,7 @@ ggsave(
 plt <-
   ggarrange(
     plt.iv.north, plt.iv.central, plt.iv.south,
-    ncol = 1, align = "v", widths = rep(15, 3), heights = c(2, 1.95 , 2.09)
+    ncol = 1, align = "v", widths = rep(15, 3), heights = c(2, 1.91 , 2.13)
   )
 
 ggsave(
@@ -247,5 +264,5 @@ ggsave(
   units = "cm", dpi = 500, height = 6, width = 15
 )
 
-
+#
 #

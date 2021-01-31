@@ -1,10 +1,9 @@
 rm(list = ls())
 
+library(ggpubr)
 library(tidyverse)
 
 load("data/rdata/anomalies_iv-and-sst.RData")
-
-df.anom
 
 df.iv.north <-
   dplyr::select(
@@ -73,30 +72,25 @@ plt.iv.north <-
     legend.position = c(0.5, 0.85),
     legend.title = element_blank(),
     legend.text = element_text(size = 6, family = "Source Sans Pro"),
-    axis.text.x = element_text(
-      size = 7, colour = "black", family = "Source Sans Pro",
-      angle = 0, vjust = .6
-    ),
+    axis.text.x = element_blank(),
     axis.text.y = element_text(
       size = 7, family = "Source Sans Pro", color = "black",
       face = c("plain", "plain", "bold", "plain", "plain")
     ),
     axis.title.x = element_blank(),
-    axis.title.y = element_text(
-      family = "Source Sans Pro", color = "black", size = 8 # , face = "bold"
-    ),
-    axis.ticks.x = element_line(color = "black", size = .3),
+    axis.title.y = element_blank(),
+    axis.ticks.x = element_blank(),
     axis.ticks.y = element_line(color = "black", size = .3),
     axis.ticks.length.x = unit(1.5, "pt"),
     axis.ticks.length.y = unit(1.5, "pt"),
     panel.grid = element_blank(),
     panel.border = element_rect(size = .5, color = "black"),
-    plot.margin = margin(1.5, .1, 1, 1, "cm") # ,
+    plot.margin = margin(.1, .1, .1, .1, "cm")
   )
 
 ggsave(
   plot = plt.iv.north, "export/anom_north_ndvi.png",
-  width = 15, height = 4.5, units = "cm", dpi = 500
+  width = 15, height = 2, units = "cm", dpi = 500
 )
 
 ####################################################################
@@ -147,10 +141,7 @@ plt.iv.central <-
     legend.position = c(0.5, 0.85),
     legend.title = element_blank(),
     legend.text = element_text(size = 6, family = "Source Sans Pro"),
-    axis.text.x = element_text(
-      size = 7, colour = "black", family = "Source Sans Pro",
-      angle = 0, vjust = .6
-    ),
+    axis.text.x = element_blank(),
     axis.text.y = element_text(
       size = 7, family = "Source Sans Pro", color = "black",
       face = c("plain", "plain", "bold", "plain", "plain")
@@ -159,18 +150,18 @@ plt.iv.central <-
     axis.title.y = element_text(
       family = "Source Sans Pro", color = "black", size = 8 # , face = "bold"
     ),
-    axis.ticks.x = element_line(color = "black", size = .3),
+    axis.ticks.x = element_blank(),
     axis.ticks.y = element_line(color = "black", size = .3),
     axis.ticks.length.x = unit(1.5, "pt"),
     axis.ticks.length.y = unit(1.5, "pt"),
     panel.grid = element_blank(),
     panel.border = element_rect(size = .5, color = "black"),
-    plot.margin = margin(1.5, .1, 1, 1, "cm") # ,
+    plot.margin = margin(0, .1, .1, .1, "cm"),
   )
 
 ggsave(
   plot = plt.iv.central, "export/anom_central_ndvi.png",
-  width = 15, height = 4.5, units = "cm", dpi = 500
+  width = 15, height = 2, units = "cm", dpi = 500
 )
 
 ####################################################################
@@ -181,7 +172,7 @@ ggsave(
 ####################################################################
 
 plt.iv.south <-
-  ggplot(df.iv.central, aes(x = date, y = anom, group = region)) +
+  ggplot(df.iv.south, aes(x = date, y = anom, group = region)) +
   labs(y = "NDVI anomaly") +
   geom_hline(
     yintercept = 0, linetype = "dashed", color = "black", size = .3
@@ -189,7 +180,7 @@ plt.iv.south <-
   geom_line(aes(linetype = region, color = region, size = region)) +
   # geom_point(aes(color = region), size = .01) +
   scale_linetype_manual(
-    values = c("solid", "solid"), labels = lbls[4:3]
+    values = c("solid", "solid"), labels = lbls[6:5]
   ) +
   scale_color_manual(
     values = c(
@@ -197,9 +188,9 @@ plt.iv.south <-
       rgb(105.9, 54.4, 0, maxColorValue = 255),
       rgb(204.9, 166.8, 100.2, maxColorValue = 255)
     ),
-    labels = lbls[4:3]
+    labels = lbls[6:5]
   ) +
-  scale_size_manual(values = rep(.4, 2), labels = lbls[4:3]) +
+  scale_size_manual(values = rep(.4, 2), labels = lbls[6:5]) +
   scale_x_date(
     limits = c(as.Date("2002-01-01"), as.Date("2020-12-31")),
     breaks = seq(as.Date("2003-01-01"), as.Date("2020-12-31"), by = "1 year"),
@@ -230,21 +221,31 @@ plt.iv.south <-
       face = c("plain", "plain", "bold", "plain", "plain")
     ),
     axis.title.x = element_blank(),
-    axis.title.y = element_text(
-      family = "Source Sans Pro", color = "black", size = 8 # , face = "bold"
-    ),
+    axis.title.y = element_blank(),
     axis.ticks.x = element_line(color = "black", size = .3),
     axis.ticks.y = element_line(color = "black", size = .3),
     axis.ticks.length.x = unit(1.5, "pt"),
     axis.ticks.length.y = unit(1.5, "pt"),
     panel.grid = element_blank(),
     panel.border = element_rect(size = .5, color = "black"),
-    plot.margin = margin(1.5, .1, 1, 1, "cm") # ,
+    plot.margin = margin(0, .1, .1, .1, "cm")
   )
 
 ggsave(
-  plot = plt.iv.south, "export/anom_central_ndvi.png",
-  width = 15, height = 4.5, units = "cm", dpi = 500
+  plot = plt.iv.south, "export/anom_south_ndvi.png",
+  width = 15, height = 2, units = "cm", dpi = 500
+)
+
+plt <-
+  ggarrange(
+    plt.iv.north, plt.iv.central, plt.iv.south,
+    ncol = 1, align = "v", widths = rep(15, 3), heights = c(2, 1.95 , 2.09)
+  )
+
+ggsave(
+  plot = plt, "export/anom_ndvi.png",
+  units = "cm", dpi = 500, height = 6, width = 15
 )
 
 
+#

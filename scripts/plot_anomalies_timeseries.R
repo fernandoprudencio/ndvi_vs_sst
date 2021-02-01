@@ -1,24 +1,46 @@
+#' @title
+#' Plot NDVI anomaly time series by Andes region
+#'
+#' @author Fernando Prudencio
+
 rm(list = ls())
 
+#' INSTALL PACKAGES
+pkg <- c("tidyverse", "ggpubr")
+
+sapply(
+  pkg,
+  function(x) {
+    is.there <- x %in% rownames(installed.packages())
+    if (is.there == FALSE) {
+      install.packages(x, dependencies = T)
+    }
+  }
+)
+
+#' LOAD PACKAGE
 library(tidyverse)
 library(ggpubr)
 
+#' LOAD ANOMALIES TIME SERIES
 load("data/rdata/anomalies_iv-and-sst.RData")
 
+#' BUILD DATAFRAME OF NDVI ANOMALIES BY ANDES REGION
+#'   north Andes
 df.iv.north <-
   dplyr::select(
     df.anom, c("date", "ts.nw", "ts.ne")
   ) %>%
   rename("01-ts.nw" = "ts.nw", "02-ts.ne" = "ts.ne") %>%
   gather(key = "region", value = "anom", -date)
-
+#'   central Andes
 df.iv.central <-
   dplyr::select(
     df.anom, c("date", "ts.cw", "ts.ce")
   ) %>%
   rename("01-ts.cw" = "ts.cw", "02-ts.ce" = "ts.ce") %>%
   gather(key = "region", value = "anom", -date)
-
+#'   south Andes
 df.iv.south <-
   dplyr::select(
     df.anom, c("date", "ts.sw", "ts.se")
@@ -26,14 +48,16 @@ df.iv.south <-
   rename("01-ts.sw" = "ts.sw", "02-ts.se" = "ts.se") %>%
   gather(key = "region", value = "anom", -date)
 
-
+#' PLOT TIME SERIES
+#'   labels
 lbls <-
   c(
     "North-western Andes", "North-eastern Andes",
     "Central-western Andes", "Central-eastern Andes",
     "South-western Andes", "South-eastern Andes"
   )
-
+#'   plot object
+#'     north Andes
 plt.iv.north <-
   ggplot(df.iv.north, aes(x = date, y = anom, group = region)) +
   labs(y = "NDVI anomaly") +
@@ -77,7 +101,6 @@ plt.iv.north <-
     legend.box.margin = margin(0, 0, 0, 0),
     legend.key.width = unit(.4, "cm"),
     legend.key.height = unit(.05, "cm"),
-    # legend.position = c(0.5, 0.85),
     legend.position = c(0.5, 0.88),
     legend.title = element_blank(),
     legend.text = element_text(size = 6, family = "Source Sans Pro"),
@@ -97,18 +120,12 @@ plt.iv.north <-
     plot.margin = margin(.1, .1, .1, .1, "cm")
   )
 
-ggsave(
-  plot = plt.iv.north, "export/anom_north_ndvi.png",
-  width = 15, height = 2, units = "cm", dpi = 500
-)
+# ggsave(
+#   plot = plt.iv.north, "export/anom_north_ndvi.png",
+#   width = 15, height = 2, units = "cm", dpi = 500
+# )
 
-####################################################################
-####################################################################
-####################################################################
-####################################################################
-####################################################################
-####################################################################
-
+#'     central Andes
 plt.iv.central <-
   ggplot(df.iv.central, aes(x = date, y = anom, group = region)) +
   labs(y = "NDVI anomaly") +
@@ -169,18 +186,12 @@ plt.iv.central <-
     plot.margin = margin(0, .1, .1, .1, "cm"),
   )
 
-ggsave(
-  plot = plt.iv.central, "export/anom_central_ndvi.png",
-  width = 15, height = 2, units = "cm", dpi = 500
-)
+# ggsave(
+#   plot = plt.iv.central, "export/anom_central_ndvi.png",
+#   width = 15, height = 2, units = "cm", dpi = 500
+# )
 
-####################################################################
-####################################################################
-####################################################################
-####################################################################
-####################################################################
-####################################################################
-
+#'     south Andes
 plt.iv.south <-
   ggplot(df.iv.south, aes(x = date, y = anom, group = region)) +
   labs(y = "NDVI anomaly") +
@@ -204,7 +215,6 @@ plt.iv.south <-
   scale_x_date(
     limits = c(as.Date("2002-01-01"), as.Date("2020-12-31")),
     breaks = seq(as.Date("2002-01-01"), as.Date("2020-12-31"), by = "1 year"),
-    # date_labels = "%Y", expand = expansion(mult = c(0, 0)),
     labels =
       c(
         "", "2003", "", "2005", "", "2007", "", "2009", "", "2011", "",
@@ -248,21 +258,19 @@ plt.iv.south <-
     plot.margin = margin(0, .1, .1, .1, "cm")
   )
 
-ggsave(
-  plot = plt.iv.south, "export/anom_south_ndvi.png",
-  width = 15, height = 2, units = "cm", dpi = 500
-)
+# ggsave(
+#   plot = plt.iv.south, "export/anom_south_ndvi.png",
+#   width = 15, height = 2, units = "cm", dpi = 500
+# )
 
+#'     arrange plots
 plt <-
   ggarrange(
     plt.iv.north, plt.iv.central, plt.iv.south,
     ncol = 1, align = "v", widths = rep(15, 3), heights = c(2, 1.91 , 2.13)
   )
-
+#'     save plot
 ggsave(
   plot = plt, "export/anom_ndvi.png",
   units = "cm", dpi = 500, height = 6, width = 15
 )
-
-#
-#

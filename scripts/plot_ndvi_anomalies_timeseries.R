@@ -60,6 +60,10 @@ lbls <-
 #'     north Andes
 plt.iv.north <-
   ggplot(df.iv.north, aes(x = date, y = anom, group = region)) +
+  annotate(
+    geom = "text", x = as.Date("2002-04-01"), y = .1533333,
+    label = "a)", color ="black", family = "Source Sans Pro"
+  ) +
   labs(y = "NDVI anomaly") +
   geom_hline(
     yintercept = 0, linetype = "dashed", color = "black", size = .3
@@ -128,6 +132,10 @@ plt.iv.north <-
 #'     central Andes
 plt.iv.central <-
   ggplot(df.iv.central, aes(x = date, y = anom, group = region)) +
+  annotate(
+    geom = "text", x = as.Date("2002-04-01"), y = .1533333/2,
+    label = "b)", color ="black", family = "Source Sans Pro"
+  ) +
   labs(y = "NDVI anomaly") +
   geom_hline(
     yintercept = 0, linetype = "dashed", color = "black", size = .3
@@ -194,6 +202,10 @@ plt.iv.central <-
 #'     south Andes
 plt.iv.south <-
   ggplot(df.iv.south, aes(x = date, y = anom, group = region)) +
+  annotate(
+    geom = "text", x = as.Date("2002-04-01"), y = .1533333/2,
+    label = "c)", color ="black", family = "Source Sans Pro"
+  ) +
   labs(y = "NDVI anomaly") +
   geom_hline(
     yintercept = 0, linetype = "dashed", color = "black", size = .3

@@ -1,3 +1,6 @@
+info/*
+!info/metadata.txt
+
 data/*
 !data/rdata
 data/rdata/*
@@ -5,7 +8,6 @@ data/rdata/*
 !data/rdata/anomalies_iv-and-sst.RData
 !data/rdata/modis_date.RData
 
-\info
 \export
 .Rproj.user
 scripts/.Rhistory

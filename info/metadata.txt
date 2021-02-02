@@ -1,0 +1,32 @@
+- calculate_anomalies.R
+calculte anomalies for NDVI time series and save it with SST anomalies time series y a dataframe
+
+- calculate_modis_mean_climatology.R
+calculate average climatology by month
+
+- calculate_modis_sd_climatology.R
+calculate standard deviation climatology by month
+
+- calculate_monthly_modis.R
+calculate monthly time series from time series every eight days
+
+- extract_values_by_ANDESmondis.R
+extract average monthly time series by Andes region
+
+- map_mean_clim.R
+plot average climatology by group of three months
+
+- map_sd_clim.R
+plot standard deviation climatology by group of three months
+
+- plot_ndvi_anomalies_timeseries.R
+plot ndvi anomalies time series for 2002-2020 by Andes region
+
+- plot_sst_anomalies_timeseries.R
+plot sst anomalies time series for 2002-2020 by Ocean region
+
+- remove_trend.R
+training about time series analysis
+
+- time_series_modis_by_three_months.R
+calculate climatology for average condition of three months group

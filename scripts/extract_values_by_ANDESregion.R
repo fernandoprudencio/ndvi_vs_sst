@@ -51,6 +51,13 @@ sf.andes <-
   dplyr::rename("id" = "Id") %>%
   arrange(id)
 
+#'   save vector file
+# st_write(
+#   sf.andes,
+#   dsn = "data/vector/Andes_region.gpkg",
+#   layer = "Andes_region_clipped"
+# )
+
 #' LIST MONTHLY NDVI FILES
 ls.ndvi <- list.files("data/raster/ndvi/monthly", ".tif", full.names = T)
 

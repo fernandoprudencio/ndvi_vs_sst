@@ -60,12 +60,9 @@ sp.world <- as(st_geometry(sf.world), Class = "Spatial")
 #'   load climat regions
 #'     load sf data
 sf.region <- st_read(
-  dsn = "data/vector/climatic_regions.gpkg",
-  layer = "bastian_regions", quiet = T, as_tibble = T
-) %>%
-  mutate(id = c(1, 4, 2, 3, 4)) %>%
-  group_by(id) %>%
-  summarise()
+  dsn = "data/vector/Andes_region.gpkg",
+  layer = "Andes_region_clipped", quiet = T, as_tibble = T
+)
 #'     load sp data
 sp.region <- as(st_geometry(sf.region), Class = "Spatial")
 
@@ -105,7 +102,7 @@ cb.palette <-
   )
 
 #'   Define plot name
-name <- "export/ndvi_sd_clim.png"
+name <- "export/ndvi_sd_clim_v2.png"
 #'   Save plot
 png(name, width = 20, height = 10, units = "cm", res = 500)
 
@@ -119,7 +116,7 @@ levelplot(index,
   # layout = c(4, 1), # define number of row and colums
   scales = list(
     x = list(
-      limits = c(-81.8, -68.2), tick.number = 4#, tck = .2
+      limits = c(-81.8, -68.2), tick.number = 4 # , tck = .2
     ),
     y = list(
       at = c(-15, -10, -5, 0), limits = c(-18.5, .1), rot = 90,

@@ -60,12 +60,9 @@ sp.world <- as(st_geometry(sf.world), Class = "Spatial")
 #'   load climat regions
 #'     load sf data
 sf.region <- st_read(
-  dsn = "data/vector/climatic_regions.gpkg",
-  layer = "bastian_regions", quiet = T, as_tibble = T
-) %>%
-  mutate(id = c(1, 4, 2, 3, 4)) %>%
-  group_by(id) %>%
-  summarise()
+  dsn = "data/vector/Andes_region.gpkg",
+  layer = "Andes_region_clipped", quiet = T, as_tibble = T
+)
 #'     load sp data
 sp.region <- as(st_geometry(sf.region), Class = "Spatial")
 
@@ -118,7 +115,7 @@ cb.palette <-
 #   )
 
 #'   Define plot name
-name <- "export/ndvi_mean_clim.png"
+name <- "export/ndvi_mean_clim_v2.png"
 #'   Save plot
 png(name, width = 20, height = 10, units = "cm", res = 500)
 

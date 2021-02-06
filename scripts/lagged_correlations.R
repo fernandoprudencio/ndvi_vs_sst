@@ -94,7 +94,8 @@ plot.lc <- function(andes, ocean, pallete, data) {
       ),
     sub = subtitle,
     at = seq(-1, 1, .2),
-    margin = F,
+    margin = T,
+    scales.margin = list(x = NULL, y = NULL),
     pretty = T,
     col.regions = rev(pallete),
     colorkey = colkey,
@@ -152,6 +153,190 @@ plt <- lapply(
   pallete = cb.palette, data = df.anom
 )
 
+plt[[1]]
+
+
+lbls <- c(
+  "[-1,-0.8]", "<-0.8,0.6]", "<-0.6,-0.4]", "<-0.4,-0.2]", "<-0.2,0]",
+  "<0,0.2]", "<0.2,0.4]", "<0.4,0.6]", "<0.6,0.8]", "<0.8,1]"
+)
+
+table <-
+  list.cor[[1]] %>%
+  mutate(
+    countfactor = cut(
+      value,
+      breaks = seq(-1, 1, .2),
+      labels = lbls
+    ),
+    lag = as.integer(lag),
+    month = sprintf("%02d", month)
+  )
+
+ggplot(table, aes(x = lag, y = month, fill = countfactor)) +
+  geom_tile(colour = "black", size = .2) +
+  guides(
+    fill = guide_legend(
+      title = "Correlation Coefficient", nrow = 1, rot = 90,
+      direction = "horizontal", title.position = "bottom",
+      title.theme = element_text(
+        size = 15, colour = "black", family = "Source Sans Pro", hjust = .5
+      ),
+      label.position = "bottom",
+      label.theme = element_text(
+        size = 12, colour = "black", family = "Source Sans Pro", angle = 0
+      )
+    )
+  ) +
+  labs(
+    x = "Monthly Lag", y = "ONI", title = "NORTH-WESTERN ANDES"
+  ) +
+  scale_x_continuous(breaks = seq(0, 11, 1), expand = c(0, 0)) +
+  scale_y_discrete(
+    labels = rev(month.abb),
+    expand = c(0, 0)
+  ) +
+  scale_fill_manual(
+    limits = lbls, values = rev(cb.palette)
+  ) +
+  theme_bw() +
+  theme(
+    legend.background =
+      element_rect(fill = "transparent", color = "transparent", size = .2),
+    legend.position = "bottom",
+    legend.spacing.x = unit(0, 'cm'),
+    legend.title = element_text(
+      hjust = .5, colour = "black", family = "Source Sans Pro"
+    ),
+    legend.margin = margin(grid::unit(0, "cm")),
+    # legend.text =
+    #   element_text(
+    #     colour = "black", size = 3, face = "bold", family = "Source Sans Pro"
+    #   ),
+    legend.key.height = grid::unit(0.5, "cm"),
+    legend.key.width = grid::unit(2, "cm"),
+    legend.box.margin = margin(0, 0, 0, 0),
+
+    axis.title = element_text(
+      colour = "black", size = 15, face = "bold", family = "Source Sans Pro"
+    ),
+    axis.text.x =
+      element_text(
+        size = 10, colour = "black", family = "Source Sans Pro"
+      ),
+    axis.text.y =
+      element_text(
+        size = 10, colour = "black", family = "Source Sans Pro"
+      ),
+    axis.ticks = element_line(size = 0),
+    panel.border = element_blank(),
+    panel.grid = element_blank(),
+    plot.background = element_blank(),
+    plot.margin = margin(.1, .1, .1, .1, "cm"),
+    plot.title = element_text(
+      colour = "black", hjust = .5, size = 14, face = "bold",
+      family = "Source Sans Pro"
+    )
+  )
+
+
+
+ # read csv file
+m <- read.csv("data/tables/measles_lev1.csv", header = T, stringsAsFactors = F, skip = 2)
+
+# inspect data
+head(m)
+str(m)
+table(m$YEAR)
+table(m$WEEK)
+
+m2 <- m %>%
+  # convert data to long format
+  gather(key = "state", value = "value", -YEAR, -WEEK) %>%
+  # rename columns
+  setNames(c("year", "week", "state", "value")) %>%
+  # convert year to factor
+  mutate(year = factor(year)) %>%
+  # convert week to factor
+  mutate(week = factor(week)) %>%
+  # convert value to numeric (also converts '-' to NA, gives a warning)
+  mutate(value = as.numeric(value))
+
+fn_tc <- function(x) paste(str_to_title(unlist(strsplit(x, "[.]"))), collapse = " ")
+m2$state <- sapply(m2$state, fn_tc)
+
+na_sum <- function(x) {
+  if (all(is.na(x))) val <- sum(x, na.rm = F)
+  if (!all(is.na(x))) val <- sum(x, na.rm = T)
+  return(val)
+}
+
+# sum incidences for all weeks into one year
+m3 <- m2 %>%
+  group_by(year, state) %>%
+  summarise(count = na_sum(value)) %>%
+  as.data.frame()
+
+m4 <- m3 %>%
+  # convert state to factor and reverse order of levels
+  mutate(state = factor(state, levels = rev(sort(unique(state))))) %>%
+  # create a new variable from count
+  mutate(countfactor = cut(count,
+    breaks = c(-1, 0, 1, 10, 100, 500, 1000, max(count, na.rm = T)),
+    labels = c("0", "0-1", "1-10", "10-100", "100-500", "500-1000", ">1000")
+  )) %>%
+  # change level order
+  mutate(countfactor = factor(as.character(countfactor), levels = rev(levels(countfactor))))
+textcol <- "grey40"
+as_tibble(m4)
+ggplot(m4, aes(x = year, y = state, fill = countfactor)) +
+  geom_tile(colour = "white", size = 0.2) +
+  guides(fill = guide_legend(title = "Cases per\n100,000 people")) +
+  labs(x = "", y = "", title = "Incidence of Measles in the US") +
+  scale_y_discrete(expand = c(0, 0)) +
+  scale_x_discrete(expand = c(0, 0), breaks = c("1930", "1940", "1950", "1960", "1970", "1980", "1990", "2000")) +
+  scale_fill_manual(values = c("#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#e6f598", "#abdda4", "#ddf1da"), na.value = "grey90") +
+  # coord_fixed()+
+  theme_grey(base_size = 10) +
+  theme(
+    legend.position = "right", legend.direction = "vertical",
+    legend.title = element_text(colour = textcol),
+    legend.margin = margin(grid::unit(0, "cm")),
+    legend.text = element_text(colour = textcol, size = 7, face = "bold"),
+    legend.key.height = grid::unit(0.8, "cm"),
+    legend.key.width = grid::unit(0.2, "cm"),
+    axis.text.x = element_text(size = 10, colour = textcol),
+    axis.text.y = element_text(vjust = 0.2, colour = textcol),
+    axis.ticks = element_line(size = 0.4),
+    plot.background = element_blank(),
+    panel.border = element_blank(),
+    plot.margin = margin(0.7, 0.4, 0.1, 0.2, "cm"),
+    plot.title = element_text(colour = textcol, hjust = 0, size = 14, face = "bold")
+  )
+
+# intervals <- seq(-1, 1, .2)
+# binned <- cut(table$value, breaks = intervals)
+# colfunc <- colorRampPalette(c("yellow", "black", "steelblue"))
+# colgroups <- colfunc(length(levels(binned)))
+# res <- colgroups[as.integer(binned)]
+# res <- factor(res, levels = colgroups)
+# build_labels <- function(breaks) {
+#   labels <- gsub('\\([^,]*,(-?\\d+).*', '\\1', levels(binned))
+#   c(head(labels, -1), '')
+# }
+
+# ggplot(table, aes(lag, month, fill = res)) +
+#   geom_tile(color = "black") +
+#   scale_fill_manual(values = levels(res), labels = build_labels) +
+#   guides(fill = guide_legend(label.vjust = -0.25))
+#
+# scale_fill_manual(values = levels(res), labels = levels(binned))
+###########################################################################
+###########################################################################
+###########################################################################
+###########################################################################
+###########################################################################
+
 #' SAVE PLOT
 png(
   "export/lag_cor.png",
@@ -171,28 +356,38 @@ grid <- mutate(
   rename("value1" = "value") %>%
   gather(
     key = "region", value = "value", -month, -lag
-  )# %>%
-  # mutate(
-  #   region = replace(region, region == "value1", "NORTH-EASTERN ANDES"),
-  #   region = replace(region, region == "value2", "CENTRAL-EASTERN ANDES"),
-  #   region = replace(region, region == "value3", "SOUTH-EASTERN ANDES"),
-  #   region = replace(region, region == "value4", "NORTH-WESTERN ANDES"),
-  #   region = replace(region, region == "value5", "CENTRAL-WESTERN ANDES"),
-  #   region = replace(region, region == "value6", "SOUTH-WESTERN ANDES")
-  # )
+  ) # %>%
+# mutate(
+#   region = replace(region, region == "value1", "NORTH-EASTERN ANDES"),
+#   region = replace(region, region == "value2", "CENTRAL-EASTERN ANDES"),
+#   region = replace(region, region == "value3", "SOUTH-EASTERN ANDES"),
+#   region = replace(region, region == "value4", "NORTH-WESTERN ANDES"),
+#   region = replace(region, region == "value5", "CENTRAL-WESTERN ANDES"),
+#   region = replace(region, region == "value6", "SOUTH-WESTERN ANDES")
+# )
 
 levelplot(value ~ lag * month | region,
   data = grid,
   layout = c(3, 2), # define number of row and colums
-  names.attr = list(2001:2006),
-  par.strip.text = list(2001:2006, cex = .8, lines = 1.5), # header size for each map
+  names.attr = rep("fff", 6),
+  par.strip.text = list(cex = 1, lines = 3), # header size for each map
   sub = list(
     "Correlation Coefficient",
     cex = .6, hjust = .35, vjust = .3,
     fontface = "plain", line = 0.5, side = "right"
   ),
+  scales = list(
+    x = list(
+      cex = .8, label = -1:11, tick.number = 12,
+      fontfamily = "Source Sans Pro"
+    ),
+    y = list(
+      cex = .8, label = c("x", rev(month.abb)), tick.number = 12,
+      fontfamily = "Source Sans Pro"
+    )
+  ),
   at = seq(-1, 1, .2),
-  margin = F,
+  margin = T,
   pretty = T,
   col.regions = rev(cb.palette),
   colorkey = list(
@@ -208,16 +403,6 @@ levelplot(value ~ lag * month | region,
   ),
   xlab = list("Monthy Lag", cex = .8, fontfamily = "Source Sans Pro", vjust = -.8),
   ylab = list("ONI", cex = .8, fontfamily = "Source Sans Pro", vjust = 2),
-  scales = list(
-    x = list(
-      cex = .8, label = -1:11, tick.number = 12,
-      fontfamily = "Source Sans Pro"
-    ),
-    y = list(
-      cex = .8, label = c("x", rev(month.abb)), tick.number = 12,
-      fontfamily = "Source Sans Pro"
-    )
-  ),
   label.style = "align",
   lwd = 1,
   region = T, # show value by pixel
@@ -227,13 +412,14 @@ levelplot(value ~ lag * month | region,
   par.settings = list(
     axis.text = list(fontfamily = "Source Sans Pro", cex = 1),
     axis.components = list(
-      bottom = list(tck = 0, pad1 = .5),
-      top = list(tck = 0, pad1 = 0),
-      left = list(tck = 0, pad1 = .5),
-      right = list(tck = 0, pad1 = 0)
+      bottom = list(tck = 0, pad1 = 1),
+      top = list(tck = 0, pad1 = 1),
+      left = list(tck = 0, pad1 = 1),
+      right = list(tck = 0, pad1 = 1)
     ),
-    strip.background = list(col = "transparent"), # header fill for each map
-    strip.border = list(col = "transparent", lwd = 1), # header line for each map
+    strip.text = list(col = "blue"), # header fill for each map
+    strip.background = list(col = "red"), # header fill for each map
+    strip.border = list(col = "black", lwd = 3), # header line for each map
     panel.background = list(col = "gray"),
     axis.line = list(lwd = 1, col = "black")
   ),
@@ -246,7 +432,21 @@ levelplot(value ~ lag * month | region,
 # names(p)
 ########################
 
+layers <- c(1:4)
+s2 <- stack()
 
+for (i in layers) {
+  r <- raster(nrows = 100, ncols = 100)
+  r[] <- sample(seq(from = 1, to = 6, by = 1), size = 10000, replace = TRUE)
+  rasc <- ratify(r)
+  rat <- levels(rasc)[[1]]
+  rat$legend <- c("A", "B", "C", "D", "E", "F")
+  levels(rasc) <- rat
+  s2 <- stack(s2, rasc)
+}
+
+# using default names
+levelplot(s2, names.attr = rep("fff", 4), col.regions = rev(terrain.colors(6)), main = "example")
 
 
 
@@ -259,11 +459,8 @@ marrangeGrob(plt)
 
 library(ggpubr)
 grid.draw(
-  rbind(
-    ggplotGrob(plt[[1]]), ggplotGrob(plt[[2]]), ggplotGrob(plt[[3]]),
-    ggplotGrob(plt[[4]]), ggplotGrob(plt[[5]]), ggplotGrob(plt[[6]]),
-    size = "first"
-  )
+  plt[[1]], plt[[2]], plt[[3]],
+  plt[[4]], plt[[5]], plt[[6]]
 )
 
 plot_grid(

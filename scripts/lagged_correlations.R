@@ -29,6 +29,7 @@ library(latticeExtra)
 library(grid)
 library(RColorBrewer)
 library(gridExtra)
+library(boot)
 
 #' LOAD ANOMALY VALUES
 load("data/rdata/anomalies_iv-and-sst.RData")
@@ -47,11 +48,21 @@ cb.palette <-
   )
 
 #' GENERATE HEATMAP
-anom <- "icen"
+#'  ocean regions: oni, icen, natl and satl
+anom <- "satl"
+
+lbls <- c(
+  "[-1,-0.8]", "<-0.8,0.6]", "<-0.6,-0.4]", "<-0.4,-0.2]", "<-0.2,0]",
+  "<0,0.2]", "<0.2,0.4]", "<0.4,0.6]", "<0.6,0.8]", "<0.8,1]"
+)
+
 plt <- lapply(
   andes.region,
   FUN = plot.lc, ocean = sprintf("anom.%1$s", anom),
-  pallete = cb.palette, data = df.anom
+  palette = cb.palette,
+  df = df.anom,
+  cor.type = "pearson",
+  alpha = 0.03
 )
 
 #' ARRANGE HEATMAPS

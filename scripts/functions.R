@@ -1,22 +1,56 @@
 #' 1| FUNCTION TO CALCULATE LAGGED CORRELATION
-lagged.cor <- function(ndvi, sst, data) {
+#'   you must first test if the variables follow a normal distribution
+#'   with shapiro-wilks test
+lagged.cor <- function(ndvi, sst, df, cor.type, alpha) {
   for (k in 1:12) {
     anom.sst <-
-      dplyr::select(data, date, sst) %>%
+      dplyr::select(df, date, sst) %>%
       dplyr::filter(date >= "2002-06-01" & date <= "2020-06-01") %>%
       dplyr::filter(str_sub(date, 6, 7) == sprintf("%02d", k))
     names(anom.sst)[2] <- "anom.sst"
 
     for (i in 0:11) {
       anom.ndvi <-
-        dplyr::select(data, date, ndvi) %>%
+        dplyr::select(df, date, ndvi) %>%
         dplyr::filter(date >= "2002-06-01" & date <= "2020-06-01") %>%
         dplyr::filter(date %in% (anom.sst$date + months(i)))
       names(anom.ndvi)[2] <- "anom.ndvi"
 
       x <- anom.sst$anom.sst[1:nrow(anom.ndvi)]
       y <- anom.ndvi$anom.ndvi
-      value <- cor(x, y, method = "pearson")
+      r1 <- cor(x, y, method = cor.type)
+
+      for (j in 1:100) {
+        smpl <- sample(1:length(x), 16)
+        dt <-
+          tibble(id = 1:length(x), x, y) %>%
+          dplyr::filter(id %in% smpl)
+        cor <- cor.test(dt$x, dt$y, method = cor.type)
+
+        if (j == 1) stat <- cor$p.value else stat <- c(stat, cor$p.value)
+      }
+
+      p.value <- median(stat, na.rm = T)
+
+      # p.value.boots <-
+      #   boot(
+      #     data = tibble(x, y),
+      #     statistic = function(data, index) {
+      #       sub.data <- data[index, ]
+      #       cor <- cor.test(sub.data$x, sub.data$y, method = cor.type)
+      #       c(cor$p.value)
+      #     },
+      #     R = 1000
+      #   )
+
+      # p.value <- mean(p.value.boots$t, na.rm = T)
+      # p.value <- cor.test(x, y, method = cor.type)
+
+      if (p.value <= alpha) {
+        value <- r1
+      } else {
+        value <- 0
+      }
 
       if (i == 0) r <- value else r <- c(r, value)
     }
@@ -35,13 +69,16 @@ lagged.cor <- function(ndvi, sst, data) {
 }
 
 #' 2| FUNCTION TO PLOT LAGGED CORRELATION
-plot.lc <- function(andes, ocean, pallete, data) {
+plot.lc <- function(andes, ocean, palette, df, cor.type, alpha) {
   lbls <- c(
     "[-1,-0.8]", "<-0.8,0.6]", "<-0.6,-0.4]", "<-0.4,-0.2]", "<-0.2,0]",
     "<0,0.2]", "<0.2,0.4]", "<0.4,0.6]", "<0.6,0.8]", "<0.8,1]"
   )
   df <-
-    lagged.cor(sst = ocean, ndvi = andes, data = data) %>%
+    lagged.cor(
+      sst = ocean, ndvi = andes, df = df,
+      cor.type = cor.type, alpha = alpha
+    ) %>%
     mutate(
       countfactor = cut(
         value,
@@ -59,9 +96,9 @@ plot.lc <- function(andes, ocean, pallete, data) {
   )
 
   if (andes == "ts.nw" | andes == "ts.cw" | andes == "ts.sw") {
-    space = .05
+    space <- .05
   } else {
-    space = .3
+    space <- .3
   }
 
   #' PLOT HEATMAP
@@ -90,7 +127,7 @@ plot.lc <- function(andes, ocean, pallete, data) {
       expand = c(0, 0)
     ) +
     scale_fill_manual(
-      limits = lbls, values = rev(pallete)
+      limits = lbls, values = rev(palette)
     ) +
     theme_bw() +
     theme(
